@@ -21,13 +21,26 @@ const desktopImageUrls = [
 ];
 
 const mobileImageUrls = [
-  'mobileUrl1',
-  'mobileUrl2',
-  'mobileUrl3',
-  'mobileUrl4',
-  'mobileUrl5',
+  'https://m.media-amazon.com/images/M/MV5BMDBmYTZjNjUtN2M1MS00MTQ2LTk2ODgtNzc2M2QyZGE5NTVjXkEyXkFqcGdeQXVyNzAwMjU2MTY@._V1_FMjpg_UX1000_.jpg',
+  'https://m.media-amazon.com/images/M/MV5BNGIyYWMzNjktNDE3MC00YWQyLWEyMmEtN2ZmNzZhZDk3NGJlXkEyXkFqcGdeQXVyMTUzMTg2ODkz._V1_FMjpg_UX1000_.jpg',
+  'https://m.media-amazon.com/images/M/MV5BYzRmOGQwZjktYjM2Ni00M2NmLWFlZDYtZGFhM2RkM2VhZDI1XkEyXkFqcGdeQXVyMTM1NjM2ODg1._V1_FMjpg_UX1000_.jpg',
+  'https://m.media-amazon.com/images/M/MV5BZDlkZmRlYTctNGJmNy00MjVkLThjZDQtMWY5Zjg2NjlhZDZkXkEyXkFqcGdeQXVyMDM2NDM2MQ@@._V1_FMjpg_UX1000_.jpg',
+  'https://m.media-amazon.com/images/M/MV5BZjZkNThjNTMtOGU0Ni00ZDliLThmNGUtZmMxNWQ3YzAxZTQ1XkEyXkFqcGdeQXVyMTUzMTg2ODkz._V1_FMjpg_UX1000_.jpg',
+  'https://m.media-amazon.com/images/M/MV5BOTI5MjNjMTMtN2NiNC00YjBlLTgzMWQtMGRhZDZkYmY1NGU2XkEyXkFqcGdeQXVyNTgyNTA4MjM@._V1_.jpg',
+  'https://m.media-amazon.com/images/M/MV5BMDEwZmU1ZTUtNTlmOS00ZGZlLWIyZjAtOTc1MmE2ZGMyNTFkXkEyXkFqcGdeQXVyNjM0MTI4Mw@@._V1_.jpg',
+  'https://m.media-amazon.com/images/M/MV5BMDBiYmRkNjUtYzc4My00NGFiLWE2NWUtMGU1ZDA1NTQ3ZjQwXkEyXkFqcGdeQXVyMTM1NjM2ODg1._V1_FMjpg_UX1000_.jpg'
 ];
 
+const textMovies = [
+  'Oppenheimer winner of 7 Oscars Awards',
+  'Poor Things winner of 4 Oscars Awards',
+  'The Zone of Interest of 2 Oscars Awards',
+  'American Fiction winner the Best Adapted Screenplay',
+  'The Boy and the Heron winner of the Best Animation',
+  'Godzilla Minus One winner of the Best Visual Effects',
+  'Barbie winner of the Best Original Song',
+  'Anatomy of a Fall winner the Best Original Screenplay'
+]
 
 export default function Home() {
   return (
@@ -53,7 +66,7 @@ export default function Home() {
 
     <div className="w-full flex flex-col items-center">
     <div className="mt-5 w-3/4 bg-blue-200 h-[26rem] flex justify-center">
-    <Carousel className="w-full h-[26rem] bg-blue-700"
+    <Carousel className="w-full h-[26rem] bg-[#2953A6]"
     plugins={[
       AutoPlay({
         delay: 5000
@@ -62,22 +75,29 @@ export default function Home() {
     >
       <CarouselContent className="h-[26rem]">
         {Array.from({ length: 8 }).map((_, index) => (
-        <CarouselItem key={index} className="h-[26rem] bg-yellow-500">
+        <CarouselItem key={index} className="h-[26rem] bg-[#2953a6]">
           <div className="p-1">
-            <Card className="h-[26rem] bg-red-400">
-              <CardContent className="flex flex-col aspect-square items-center w-full justify-center p-6 h-96">
+            <Card className="h-[26rem] bg-[#1F82BF]">
+              <CardContent className="flex flex-col aspect-square items-center w-full justify-center p-6 h-[26rem]">
                 <img 
                   src={mobileImageUrls[index % mobileImageUrls.length]} 
                   alt={`Mobile Image ${index + 1}`} 
-                  className="object-cover w-full h-full block lg:hidden" // Visible en móvil
+                  className="object-cover w-full h-full block lg:hidden md:hidden" 
                 />
                 <img 
                   src={desktopImageUrls[index % desktopImageUrls.length]} 
                   alt={`Desktop Image ${index + 1}`} 
-                  className="object-cover w-full h-full hidden lg:block md:block" // Visible en escritorio
+                  className="object-cover w-full h-full hidden lg:block md:block" 
                 />
-                <span>{index+1}</span>
-              </CardContent>
+                
+                <span className="text-center py-3 text-white flex">{textMovies[index]}
+                <img
+                  src='/oscar.png'
+                  className="w-8 h-8 hidden lg:block md:block"
+                />
+                </span>
+                
+                </CardContent>
               
             </Card>
           </div>
