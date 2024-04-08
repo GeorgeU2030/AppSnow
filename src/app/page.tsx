@@ -8,6 +8,13 @@ import {
   CarouselContent,
   CarouselItem
 } from "@/components/ui/carousel"
+import { useState,useEffect } from "react";
+import { jwtDecode, JwtPayload } from "jwt-decode";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
 
 const desktopImageUrls = [
   'https://peachz.ca/wp-content/uploads/2023/06/R.jpeg',
@@ -42,7 +49,36 @@ const textMovies = [
   'Anatomy of a Fall winner the Best Original Screenplay'
 ]
 
+interface MyToken extends JwtPayload {
+  _id: string;
+}
+
 export default function Home() {
+
+    const [user, setUser] = useState<{name:string,email:string,imageProfile:string}|null>(null);
+
+    useEffect(() => {
+      const token = localStorage.getItem('token');
+
+      if (token) {
+        const decoded = jwtDecode<MyToken>(token);
+        const userID = decoded._id;
+        
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/getUser/${userID}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => setUser({name: data.name, email: data.email, imageProfile: data.imageProfile}))
+          .catch(error => console.error('Error:', error));
+      }
+    }, []);
   return (
     <div className="w-screen h-screen bg-black">
       <nav className="px-4 py-4 flex justify-between items-center bg-[#2B388F]">
@@ -54,12 +90,21 @@ export default function Home() {
         </ul>
         <ul>
           <li>
-            <Button className="mr-4 hover:bg-[#2953A6] bg-[#1F82BF] px-5">
-              Sign In
-            </Button>
-            <Button className="mr-2 hover:bg-[#2953A6] bg-[#1F82BF]">
-              Sign Up
-            </Button>
+          {user ? (
+          <Avatar className="mr-4">
+          <AvatarImage src={user.imageProfile} alt="@shadcn" />
+          <AvatarFallback>CN</AvatarFallback>
+          </Avatar>    
+          ) : (
+            <>
+              <Button className="mr-4 hover:bg-[#2953A6] bg-[#1F82BF] px-5">
+                Sign In
+              </Button>
+              <Button className="mr-2 hover:bg-[#2953A6] bg-[#1F82BF]">
+                Sign Up
+              </Button>
+            </>
+          )}
           </li>
         </ul>
       </nav>

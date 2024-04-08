@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
 
 const SignInSchema = z.object({
     email: z.string().email(
@@ -26,6 +26,8 @@ const SignInSchema = z.object({
 })
 
 export default function SignIn(){
+
+    const router = useRouter()
 
     const form = useForm<z.infer<typeof SignInSchema>>({
         resolver: zodResolver(SignInSchema),
@@ -48,7 +50,8 @@ export default function SignIn(){
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log(data);
+      localStorage.setItem('token', data.message);
+      router.push('/');
     }
 
     return (
