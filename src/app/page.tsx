@@ -15,6 +15,15 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectGroup,
+} from "@/components/ui/select"
+import { useRouter } from "next/navigation";
 
 const desktopImageUrls = [
   'https://peachz.ca/wp-content/uploads/2023/06/R.jpeg',
@@ -51,11 +60,14 @@ const textMovies = [
 
 interface MyToken extends JwtPayload {
   _id: string;
+  role: string[];
 }
 
 export default function Home() {
 
     const [user, setUser] = useState<{name:string,email:string,imageProfile:string}|null>(null);
+    const [admin,setAdmin]= useState<boolean>(false);
+    const history = useRouter();
 
     useEffect(() => {
       const token = localStorage.getItem('token');
@@ -63,7 +75,10 @@ export default function Home() {
       if (token) {
         const decoded = jwtDecode<MyToken>(token);
         const userID = decoded._id;
-        
+        const admin = decoded.role[0]
+        if(admin === 'admin'){
+          setAdmin(true)
+        }
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/getUser/${userID}`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -79,20 +94,42 @@ export default function Home() {
           .catch(error => console.error('Error:', error));
       }
     }, []);
+
+    const handleChange = (selectedValue:string) => {
+      console.log(selectedValue)
+    }
+
   return (
     <div className="w-screen h-screen bg-black">
       <nav className="px-4 py-4 flex justify-between items-center bg-[#2B388F]">
-        <ul>
+        <ul >
           <li className="flex items-center">
             <img src="/snowlogo.png" alt="logo" className="w-12 h-12" />
-            <h3 className="text-white ml-4">Snow</h3>
+            <h3 className="text-white lg:ml-4 md:ml-4 ml-1">Snow</h3>
           </li>
         </ul>
-        <ul>
+        <ul className="flex ">
+          
+            {admin ? (
+              <Select onValueChange={handleChange}>
+              <SelectTrigger className="w-[180px] mr-2 lg:mr-8 md:mr-8 bg-black text-white">
+                <SelectValue placeholder="Admin" />
+              </SelectTrigger>
+                <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="createDirector" className="font-semibold">Add a Director</SelectItem>
+                  <SelectItem value="createActor" className="font-semibold">Add an Actor</SelectItem>
+                  <SelectItem value="createMovie" className="font-semibold">Add a Movie</SelectItem>
+                </SelectGroup>
+                </SelectContent>
+              </Select>
+            ):(<>
+            </>)}
+          
           <li>
           {user ? (
-          <Avatar className="mr-4">
-          <AvatarImage src={user.imageProfile} alt="@shadcn" />
+          <Avatar className="lg:block md:block">
+          <AvatarImage src={user.imageProfile} alt="@shadcn"/>
           <AvatarFallback>CN</AvatarFallback>
           </Avatar>    
           ) : (
