@@ -96,7 +96,16 @@ export default function Home() {
     }, []);
 
     const handleChange = (selectedValue:string) => {
-      console.log(selectedValue)
+      
+      if(selectedValue == 'logout'){
+        handleLogout();
+      }
+    }
+
+    const handleLogout = () => {
+      localStorage.removeItem('token');
+      setUser(null);
+      history.push('/');
     }
 
   return (
@@ -120,6 +129,7 @@ export default function Home() {
                   <SelectItem value="createDirector" className="font-semibold">Add a Director</SelectItem>
                   <SelectItem value="createActor" className="font-semibold">Add an Actor</SelectItem>
                   <SelectItem value="createMovie" className="font-semibold">Add a Movie</SelectItem>
+                  <SelectItem value="logout" className="font-semibold bg-red-500 text-white">LogOut</SelectItem>
                 </SelectGroup>
                 </SelectContent>
               </Select>
@@ -128,10 +138,11 @@ export default function Home() {
           
           <li>
           {user ? (
-          <Avatar className="lg:block md:block">
+          <Avatar className="lg:block md:block" >
           <AvatarImage src={user.imageProfile} alt="@shadcn"/>
           <AvatarFallback>CN</AvatarFallback>
-          </Avatar>    
+          </Avatar> 
+           
           ) : (
             <>
               <Button className="mr-4 hover:bg-[#2953A6] bg-[#1F82BF] px-5">
