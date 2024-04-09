@@ -25,6 +25,9 @@ import {
 } from "@/components/ui/select"
 import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { setUserLoading, setUser } from "@/store/userSlice";
+import { RootState } from "@/store/store";
 
 const desktopImageUrls = [
   'https://peachz.ca/wp-content/uploads/2023/06/R.jpeg',
@@ -66,14 +69,17 @@ interface MyToken extends JwtPayload {
 
 export default function Home() {
 
-    const [user, setUser] = useState<{name:string,email:string,imageProfile:string}|null>(null);
     const [admin,setAdmin]= useState<boolean>(false);
     const history = useRouter();
-    const [loadingUser, setLoadingUser] = useState(true);
+    const dispatch = useDispatch();
+    const loadingUser = useSelector((state:RootState) => state.user.loading);
+    const user = useSelector((state:RootState) => state.user.data);
+
     useEffect(() => {
       const token = localStorage.getItem('token');
 
       if (token) {
+        dispatch(setUserLoading(true));
         const decoded = jwtDecode<MyToken>(token);
         const userID = decoded._id;
         const admin = decoded.role[0]
@@ -91,10 +97,15 @@ export default function Home() {
             }
             return response.json();
           })
-          .then(data => setUser({name: data.name, email: data.email, imageProfile: data.imageProfile}))
-          .catch(error => console.error('Error:', error));
+          .then(data => {
+            dispatch(setUser({name: data.name, email: data.email, imageProfile: data.imageProfile})); 
+          })
+          .catch(error => console.error('Error:', error))
+          .finally(() => dispatch(setUserLoading(false)));
       }
-      setLoadingUser(false);
+      else {
+        dispatch(setUserLoading(false));
+      }
     }, []);
 
     const signIn = () => {
@@ -144,11 +155,11 @@ export default function Home() {
           
           <li>
           {loadingUser ? (
-          <LoaderCircle />
+          <LoaderCircle className="text-white" />
           ) : user ? (
             <Avatar className="lg:block md:block" >
               <AvatarImage src={user.imageProfile} alt="@shadcn"/>
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarFallback></AvatarFallback>
             </Avatar> 
           ) : (
             <>
