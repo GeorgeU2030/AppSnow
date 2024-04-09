@@ -77,7 +77,6 @@ export default function SignUp(){
 
     return (
         <div className="min-h-screen lg:min-h-screen lg:h-auto w-full bg-black">
-            
         {showAlert && (
             <div className="flex justify-center">
             <Alert className="w-2/3 mt-2">
@@ -86,7 +85,7 @@ export default function SignUp(){
             <AlertDescription>
               <a onClick={goLogin} className="cursor-pointer text-[#2953a6]">Go to Login</a>
             </AlertDescription>
-          </Alert>
+            </Alert>
             </div>
         )}
         <div className="flex flex-col h-full w-full text-white items-center justify-center lg:justify-start">
@@ -105,11 +104,11 @@ export default function SignUp(){
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel className="text-white">Name</FormLabel>
               <FormControl>
                 <Input placeholder="your complete name" className="text-end text-black" {...field} />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-white"/>
             </FormItem>
             
           )}
@@ -120,11 +119,11 @@ export default function SignUp(){
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className="text-white">Email</FormLabel>
               <FormControl>
                 <Input placeholder="your email" className="text-end text-black" {...field} />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-white"/>
             </FormItem>
             
           )}
@@ -134,11 +133,11 @@ export default function SignUp(){
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel className="text-white">Password</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="your password" className="text-end text-black" {...field} />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-white"/>
             </FormItem>
             
           )}
@@ -148,7 +147,7 @@ export default function SignUp(){
           name="imageProfile"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image Profile</FormLabel>
+              <FormLabel className="text-white">Image Profile</FormLabel>
               <FormControl className="flex">
                 <div>
                 <Avatar className="lg:block md:block">
@@ -158,7 +157,7 @@ export default function SignUp(){
                 <Input placeholder="your avatar" className="text-end text-black ml-2" {...field} />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-white"/>
             </FormItem>
             
           )}

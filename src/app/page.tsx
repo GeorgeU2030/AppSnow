@@ -24,6 +24,7 @@ import {
   SelectGroup,
 } from "@/components/ui/select"
 import { useRouter } from "next/navigation";
+import { LoaderCircle } from "lucide-react";
 
 const desktopImageUrls = [
   'https://peachz.ca/wp-content/uploads/2023/06/R.jpeg',
@@ -68,7 +69,7 @@ export default function Home() {
     const [user, setUser] = useState<{name:string,email:string,imageProfile:string}|null>(null);
     const [admin,setAdmin]= useState<boolean>(false);
     const history = useRouter();
-
+    const [loadingUser, setLoadingUser] = useState(true);
     useEffect(() => {
       const token = localStorage.getItem('token');
 
@@ -93,6 +94,7 @@ export default function Home() {
           .then(data => setUser({name: data.name, email: data.email, imageProfile: data.imageProfile}))
           .catch(error => console.error('Error:', error));
       }
+      setLoadingUser(false);
     }, []);
 
     const signIn = () => {
@@ -141,12 +143,13 @@ export default function Home() {
             </>)}
           
           <li>
-          {user ? (
-          <Avatar className="lg:block md:block" >
-          <AvatarImage src={user.imageProfile} alt="@shadcn"/>
-          <AvatarFallback>CN</AvatarFallback>
-          </Avatar> 
-           
+          {loadingUser ? (
+          <LoaderCircle />
+          ) : user ? (
+            <Avatar className="lg:block md:block" >
+              <AvatarImage src={user.imageProfile} alt="@shadcn"/>
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar> 
           ) : (
             <>
               <Button className="mr-4 hover:bg-[#2953A6] bg-[#1F82BF] px-5" onClick={signIn}>

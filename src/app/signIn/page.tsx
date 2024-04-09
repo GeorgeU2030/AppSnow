@@ -72,11 +72,11 @@ export default function SignIn(){
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className="text-white">Email</FormLabel>
               <FormControl>
                 <Input placeholder="your email" className="text-end text-black" {...field} />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-white" />
             </FormItem>
             
           )}
@@ -86,11 +86,11 @@ export default function SignIn(){
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel className="text-white">Password</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="your password" className="text-end text-black" {...field} />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-white"/>
             </FormItem>
             
           )}
