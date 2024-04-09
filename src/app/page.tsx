@@ -95,8 +95,11 @@ export default function Home() {
       }
     }, []);
 
+    const signIn = () => {
+      history.push('/signIn');
+    }
+
     const handleChange = (selectedValue:string) => {
-      
       if(selectedValue == 'logout'){
         handleLogout();
       }
@@ -105,6 +108,7 @@ export default function Home() {
     const handleLogout = () => {
       localStorage.removeItem('token');
       setUser(null);
+      setAdmin(false);
       history.push('/');
     }
 
@@ -145,7 +149,7 @@ export default function Home() {
            
           ) : (
             <>
-              <Button className="mr-4 hover:bg-[#2953A6] bg-[#1F82BF] px-5">
+              <Button className="mr-4 hover:bg-[#2953A6] bg-[#1F82BF] px-5" onClick={signIn}>
                 Sign In
               </Button>
               <Button className="mr-2 hover:bg-[#2953A6] bg-[#1F82BF]">
