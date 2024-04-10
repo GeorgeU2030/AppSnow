@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
+import Cookies from 'js-cookie'
 
 const SignInSchema = z.object({
     email: z.string().email(
@@ -51,6 +52,7 @@ export default function SignIn(){
       }
       const data = await response.json();
       localStorage.setItem('token', data.message);
+      Cookies.set('token', data.message);
       router.push('/');
     }
 
