@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { cookies } from "next/headers";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 
-const protectedRoutes = ["/newDirector"];
+const protectedRoutes = ["/newDirector","/newMovie","/newActor"];
 
 interface MyToken extends JwtPayload {
     _id: string;

@@ -28,6 +28,8 @@ import { LoaderCircle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserLoading, setUser } from "@/store/userSlice";
 import { RootState } from "@/store/store";
+import { Clapperboard, Film, LogOut, Star} from "lucide-react";
+import Cookies from "js-cookie";
 
 const desktopImageUrls = [
   'https://peachz.ca/wp-content/uploads/2023/06/R.jpeg',
@@ -76,7 +78,7 @@ export default function Home() {
     const user = useSelector((state:RootState) => state.user.data);
 
     useEffect(() => {
-      const token = localStorage.getItem('token');
+      const token = Cookies.get("token");
 
       if (token) {
         dispatch(setUserLoading(true));
@@ -105,6 +107,7 @@ export default function Home() {
       }
       else {
         dispatch(setUserLoading(false));
+        setAdmin(false)
       }
     }, []);
 
@@ -115,6 +118,12 @@ export default function Home() {
     const handleChange = (selectedValue:string) => {
       if(selectedValue == 'logout'){
         handleLogout();
+      }else if(selectedValue == 'createDirector'){
+        history.push('/newDirector');
+      }else if(selectedValue == 'createActor'){
+        history.push('/newActor');
+      }else if(selectedValue == 'createMovie'){
+        history.push('/newMovie');
       }
     }
 
@@ -141,12 +150,32 @@ export default function Home() {
               <SelectTrigger className="w-[180px] mr-2 lg:mr-8 md:mr-8 bg-black text-white">
                 <SelectValue placeholder="Admin" />
               </SelectTrigger>
-                <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="createDirector" className="font-semibold">Add a Director</SelectItem>
-                  <SelectItem value="createActor" className="font-semibold">Add an Actor</SelectItem>
-                  <SelectItem value="createMovie" className="font-semibold">Add a Movie</SelectItem>
-                  <SelectItem value="logout" className="font-semibold bg-red-500 text-white">LogOut</SelectItem>
+                <SelectContent className="w-[180px]">
+                <SelectGroup className="w-[180px]">
+                  <SelectItem value="createDirector" className="font-semibold">
+                  <div className="flex items-center">
+                    <Clapperboard/>
+                    <span className="ml-2">+ Director</span>
+                  </div>
+                  </SelectItem>
+                  <SelectItem value="createActor" className="font-semibold flex ">
+                  <div className="flex items-center">
+                    <Star/>
+                    <span className="ml-2">+ Actor</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="createMovie" className="font-semibold">
+                  <div className="flex items-center">
+                    <Film/>
+                    <span className="ml-2">+ Movie</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="logout" className="font-semibold bg-blue-600 text-white">
+                  <div className="flex items-center">
+                    <LogOut/>
+                    <span className="ml-2">Logout</span>
+                  </div>                   
+                  </SelectItem>
                 </SelectGroup>
                 </SelectContent>
               </Select>

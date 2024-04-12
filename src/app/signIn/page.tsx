@@ -51,7 +51,6 @@ export default function SignIn(){
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      localStorage.setItem('token', data.message);
       Cookies.set('token', data.message);
       router.push('/');
     }
