@@ -12,7 +12,6 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Controller } from "react-hook-form"
 import AsyncSelect from 'react-select/async'
 import { useRouter } from "next/navigation"
 import Cookies from 'js-cookie'
@@ -37,7 +36,7 @@ interface Director {
 }
 
 interface Actor {
-    id: string
+    _id: string
     name: string
 }
 
@@ -45,13 +44,16 @@ interface Actor {
 export default function NewMovie(){
 
     const [directors, setDirectors] = useState<Director[]>([]);
+    const [actors, setActors] = useState<Actor[]>([]);
     const [isClient, setIsClient] = useState(false);
     const router = useRouter()
     const token = Cookies.get('token')
+    const [imageUrl, setImageUrl] = useState('https://static.vecteezy.com/system/resources/previews/013/743/750/original/blank-book-cover-over-png.png')
 
     useEffect(() => {
         setIsClient(true);
         searchDirectors('').then((directors) => setDirectors(directors));
+        searchActors('').then((actors) => setActors(actors));
     }, [])
 
     const form = useForm<z.infer<typeof MovieSchema>>({
@@ -59,11 +61,7 @@ export default function NewMovie(){
     defaultValues: {
       name: "",
       cover: "",
-      year: 2000,
       genre: "",
-      oscars: 0,
-      duration: 90,
-      directors: [],
       actors: [],
       points: 0,
       amount: 0
@@ -72,6 +70,7 @@ export default function NewMovie(){
   async function onSubmit (values: z.infer<typeof MovieSchema>) {
       values.points = 0
       values.amount = 0
+      
       const token = Cookies.get('token')
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/movie/createMovie`, {
         method: 'POST',
@@ -128,9 +127,10 @@ export default function NewMovie(){
       }
 
       const actors = await response.json();
+      setActors(actors);
   
       const options = actors.map((actor: Actor) => ({
-        value: actor.id,
+        value: actor._id,
         label: actor.name,
       }));
       return options;
@@ -146,9 +146,11 @@ export default function NewMovie(){
             />
             <h2 className="ml-3">Create Movie</h2>
         </div>
-        <div className="bg-[#2953A6] rounded-lg w-4/5 lg:w-1/3 md:w-2/3 border-white border-2 mb-12">
+        <div className="bg-[#2953A6] rounded-lg w-4/5 lg:w-2/3 md:w-2/3 border-white border-2 mb-12">
        <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 text-center lg:py-12 lg:px-12 md:py-12 md:px-8 py-4 px-4">
+        <div className="lg:flex ">
+        <section className="lg:w-1/2 bg-[#1F82BF] px-4 py-4">
         <FormField
           control={form.control}
           name="name"
@@ -170,7 +172,15 @@ export default function NewMovie(){
             <FormItem>
               <FormLabel className="text-white">Cover</FormLabel>
               <FormControl className="flex">
-              <Input placeholder="the cover of the movie" className=" text-end text-black" {...field} />
+                <div className="flex flex-col justify-center items-center">
+                {imageUrl && <img src={imageUrl} alt="https://static.vecteezy.com/system/resources/previews/013/743/750/original/blank-book-cover-over-png.png" className="w-24 h-32" />}
+              <Input placeholder="the cover of the movie" className="mt-3 text-end text-black" {...field} 
+              onChange={(e) => {
+                field.onChange(e); 
+                setImageUrl(e.target.value); 
+              }}
+              />
+              </div>
               </FormControl>
               <FormMessage className="text-white"/>
             </FormItem>
@@ -185,7 +195,7 @@ export default function NewMovie(){
               <FormLabel className="text-white">Year </FormLabel>
               <FormControl>
                 <Input type="number" placeholder="the year of the movie" className="text-end text-black" 
-                {...field} 
+                {...field}
                 />
               </FormControl>
               <FormMessage className="text-white"/>
@@ -195,6 +205,9 @@ export default function NewMovie(){
           />
 
           
+        
+        </section>
+        <section className="lg:w-1/2 bg-[#1F82BF] px-4 py-4">
         <FormField
           control={form.control}
           name="genre"
@@ -208,7 +221,6 @@ export default function NewMovie(){
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="oscars"
@@ -243,7 +255,7 @@ export default function NewMovie(){
           )}
           />
             
-          {isClient && (
+      {isClient && (
         <FormField
         control={form.control}
         name="directors"
@@ -257,6 +269,7 @@ export default function NewMovie(){
           defaultOptions
           loadOptions={searchDirectors}
           isMulti
+          className="text-black"
           placeholder="Select directors"
           getOptionLabel={(option) => option.label}
           getOptionValue={(option) => option.value}
@@ -264,29 +277,48 @@ export default function NewMovie(){
             const directorIds = selectedOptions ? selectedOptions.map(option => option.value) : [];
             form.setValue('directors', directorIds);
           }}
-          value={field.value.map(value => ({ value, label: directors.find(d => d._id === value)?.name ?? 'Unknown' }))}
+          value={field.value ? field.value.map(value => ({ value, label: directors.find(d => d._id === value)?.name ?? 'Unknown' })) : []}
         />
-      </FormControl>
-      <FormMessage className="text-white"/>
-    </FormItem>
-  )}
-/>
-          )}
+        </FormControl>
+        <FormMessage className="text-white"/>
+        </FormItem>
+        )}
+      />
+      )}
 
-        {isClient && (
-          <FormField
-          control={form.control}
-          name="actors"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-white">Actors</FormLabel>
-              <FormControl>
-              
-              </FormControl>
-              <FormMessage className="text-white"/>
-            </FormItem>
-          )}
-        />)}
+      {isClient && (
+        <FormField
+        control={form.control}
+        name="actors"
+        render={({ field }) => (
+          <FormItem>
+          <FormLabel className="text-white">Actors</FormLabel>
+          <FormControl>
+          <AsyncSelect
+          {...field}
+          cacheOptions
+          defaultOptions
+          loadOptions={searchActors}
+          isMulti
+          className="text-black"
+          placeholder="Select actors"
+          getOptionLabel={(option) => option.label}
+          getOptionValue={(option) => option.value}
+          onChange={(selectedOptions) => {
+            const actorIds = selectedOptions ? selectedOptions.map(option => option.value) : [];
+            form.setValue('actors', actorIds);
+          }}
+          value={field.value.map(value => ({ value, label: actors.find(d => d._id === value)?.name ?? 'Unknown' }))}
+        />
+        </FormControl>
+        <FormMessage className="text-white"/>
+        </FormItem>
+        )}
+      />
+      )}
+
+    </section>
+    </div>
         <Button type="submit" className="bg-[#1F82BF] px-6">Create</Button>
         
       </form>
