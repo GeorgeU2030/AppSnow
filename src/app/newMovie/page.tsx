@@ -12,41 +12,66 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Controller } from "react-hook-form"
+import AsyncSelect from 'react-select/async'
 import { useRouter } from "next/navigation"
 import Cookies from 'js-cookie'
+import { useEffect, useState } from "react"
 
-const DirectorSchema = z.object({
+const MovieSchema = z.object({
     name: z.string(),
     cover: z.string(),
-    yearOfBirth: z.string().transform(Number),
-    country : z.string(),
+    year: z.string().transform(Number),
+    genre: z.string(),
     oscars: z.string().transform(Number),
-    nominations: z.string().transform(Number),
+    duration: z.string().transform(Number),
+    directors: z.array(z.string()),
+    actors: z.array(z.string()),
+    points: z.number(),
+    amount: z.number()
 })
 
+interface Director {
+    _id: string
+    name: string
+}
 
-export default function NewDirector(){
+interface Actor {
+    id: string
+    name: string
+}
 
-  const router = useRouter()
 
-  const form = useForm<z.infer<typeof DirectorSchema>>({
-    resolver: zodResolver(DirectorSchema),
+export default function NewMovie(){
+
+    const [directors, setDirectors] = useState<Director[]>([]);
+    const [isClient, setIsClient] = useState(false);
+    const router = useRouter()
+    const token = Cookies.get('token')
+
+    useEffect(() => {
+        setIsClient(true);
+        searchDirectors('').then((directors) => setDirectors(directors));
+    }, [])
+
+    const form = useForm<z.infer<typeof MovieSchema>>({
+    resolver: zodResolver(MovieSchema),
     defaultValues: {
       name: "",
-      picture: "",
-      yearOfBirth: 2000,
-      country: "",
+      cover: "",
+      year: 2000,
+      genre: "",
       oscars: 0,
-      nominations: 0
-    },
-  })
-    async function onSubmit (values: z.infer<typeof DirectorSchema>) {
+      duration: 90,
+      directors: [],
+      actors: [],
+      points: 0,
+      amount: 0
+  }})
 
+  async function onSubmit (values: z.infer<typeof MovieSchema>) {
+      values.points = 0
+      values.amount = 0
       const token = Cookies.get('token')
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/movie/createMovie`, {
         method: 'POST',
@@ -62,6 +87,53 @@ export default function NewDirector(){
       }
 
       router.push('/')
+    }
+
+    async function searchDirectors(search: string) {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/director/searchDirector?search=${encodeURIComponent(search)}`,{
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+
+    if (response.status === 400) { // Unauthorized
+      Cookies.remove('token');
+      router.push('/');
+      return;
+    }
+
+    const directors = await response.json();
+    setDirectors(directors);
+
+    const options = directors.map((director: Director) => ({
+      value: director._id,
+      label: director.name,
+    }));
+    return options;
+    }
+
+
+  async function searchActors(search: string) {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/actor/searchActor?search=${encodeURIComponent(search)}`,{
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.status === 400) { // Unauthorized
+        Cookies.remove('token');
+        router.push('/');
+        return;
+      }
+
+      const actors = await response.json();
+  
+      const options = actors.map((actor: Actor) => ({
+        value: actor.id,
+        label: actor.name,
+      }));
+      return options;
     }
 
     return (
@@ -93,18 +165,12 @@ export default function NewDirector(){
         />
         <FormField
           control={form.control}
-          name="picture"
+          name="cover"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Picture</FormLabel>
+              <FormLabel className="text-white">Cover</FormLabel>
               <FormControl className="flex">
-              <div>
-                <Avatar className="lg:block md:block">
-                <AvatarImage src={field.value} alt="@shadcn"/>
-                <AvatarFallback>Dir</AvatarFallback>
-                </Avatar>
-                <Input placeholder="the image of the director" className="ml-2 text-end text-black" {...field} />
-              </div>
+              <Input placeholder="the cover of the movie" className=" text-end text-black" {...field} />
               </FormControl>
               <FormMessage className="text-white"/>
             </FormItem>
@@ -113,14 +179,13 @@ export default function NewDirector(){
         />
         <FormField
           control={form.control}
-          name="yearOfBirth"
+          name="year"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Year of Birth</FormLabel>
+              <FormLabel className="text-white">Year </FormLabel>
               <FormControl>
-                <Input type="number" placeholder="the year of birth" className="text-end text-black" 
+                <Input type="number" placeholder="the year of the movie" className="text-end text-black" 
                 {...field} 
-                value={field.value ? Number(field.value) : ''}
                 />
               </FormControl>
               <FormMessage className="text-white"/>
@@ -130,30 +195,30 @@ export default function NewDirector(){
           />
 
           
-          <FormField
+        <FormField
           control={form.control}
-          name="country"
+          name="genre"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Country</FormLabel>
+              <FormLabel className="text-white">Genre</FormLabel>
               <FormControl>
-                <Input placeholder="the country of birth" className="text-end text-black" {...field} />
+                <Input placeholder="the main genre" className="text-end text-black" {...field} />
               </FormControl>
               <FormMessage className="text-white"/>
             </FormItem>
-            
           )}
-          />
+        />
 
-
-        <FormField 
+        <FormField
           control={form.control}
           name="oscars"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Oscars</FormLabel>
+              <FormLabel className="text-white">Oscars </FormLabel>
               <FormControl>
-                <Input type="number" placeholder="the oscars won" className="text-end text-black" {...field} />
+                <Input type="number" placeholder="the oscars won" className="text-end text-black" 
+                {...field} 
+                />
               </FormControl>
               <FormMessage className="text-white"/>
             </FormItem>
@@ -161,21 +226,67 @@ export default function NewDirector(){
           )}
           />
 
-        <FormField 
+        <FormField
           control={form.control}
-          name="nominations"
+          name="duration"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Nominations</FormLabel>
+              <FormLabel className="text-white">Duration </FormLabel>
               <FormControl>
-                <Input type="number" placeholder="the oscars nominations" className="text-end text-black" {...field} />
+                <Input type="number" placeholder="duration in minutes" className="text-end text-black" 
+                {...field} 
+                />
               </FormControl>
               <FormMessage className="text-white"/>
             </FormItem>
             
           )}
+          />
+            
+          {isClient && (
+        <FormField
+        control={form.control}
+        name="directors"
+        render={({ field }) => (
+          <FormItem>
+          <FormLabel className="text-white">Directors</FormLabel>
+          <FormControl>
+          <AsyncSelect
+          {...field}
+          cacheOptions
+          defaultOptions
+          loadOptions={searchDirectors}
+          isMulti
+          placeholder="Select directors"
+          getOptionLabel={(option) => option.label}
+          getOptionValue={(option) => option.value}
+          onChange={(selectedOptions) => {
+            const directorIds = selectedOptions ? selectedOptions.map(option => option.value) : [];
+            form.setValue('directors', directorIds);
+          }}
+          value={field.value.map(value => ({ value, label: directors.find(d => d._id === value)?.name ?? 'Unknown' }))}
         />
-      
+      </FormControl>
+      <FormMessage className="text-white"/>
+    </FormItem>
+  )}
+/>
+          )}
+
+        {isClient && (
+          <FormField
+          control={form.control}
+          name="actors"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Actors</FormLabel>
+              <FormControl>
+              
+              </FormControl>
+              <FormMessage className="text-white"/>
+            </FormItem>
+          )}
+        />)}
         <Button type="submit" className="bg-[#1F82BF] px-6">Create</Button>
         
       </form>

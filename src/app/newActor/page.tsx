@@ -20,7 +20,7 @@ import {
 import { useRouter } from "next/navigation"
 import Cookies from 'js-cookie'
 
-const DirectorSchema = z.object({
+const ActorSchema = z.object({
     name: z.string(),
     picture: z.string(),
     yearOfBirth: z.string().transform(Number),
@@ -30,12 +30,12 @@ const DirectorSchema = z.object({
 })
 
 
-export default function NewDirector(){
+export default function NewActor(){
 
   const router = useRouter()
 
-  const form = useForm<z.infer<typeof DirectorSchema>>({
-    resolver: zodResolver(DirectorSchema),
+  const form = useForm<z.infer<typeof ActorSchema>>({
+    resolver: zodResolver(ActorSchema),
     defaultValues: {
       name: "",
       picture: "",
@@ -45,7 +45,7 @@ export default function NewDirector(){
       nominations: 0
     },
   })
-    async function onSubmit (values: z.infer<typeof DirectorSchema>) {
+    async function onSubmit (values: z.infer<typeof ActorSchema>) {
 
       const token = Cookies.get('token')
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/actor/createActor`, {
@@ -57,6 +57,11 @@ export default function NewDirector(){
         body: JSON.stringify(values)
       });
 
+      if (response.status === 400) { // Unauthorized
+        Cookies.remove('token');
+        router.push('/');
+        return;
+      }
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

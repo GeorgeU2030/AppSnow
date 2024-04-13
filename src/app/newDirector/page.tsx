@@ -55,6 +55,11 @@ export default function NewDirector(){
         body: JSON.stringify(values)
       });
 
+      if (response.status === 400) { // Unauthorized
+        Cookies.remove('token');
+        router.push('/');
+        return;
+      }
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
