@@ -62,6 +62,7 @@ export default function NewMovie(){
       name: "",
       cover: "",
       genre: "",
+      directors: [],
       actors: [],
       points: 0,
       amount: 0
@@ -102,10 +103,20 @@ export default function NewMovie(){
       return;
     }
 
-    const directors = await response.json();
-    setDirectors(directors);
-
-    const options = directors.map((director: Director) => ({
+    const newDirectors = await response.json();
+    setDirectors(prevDirectors => {
+      const directorMap = new Map(prevDirectors.map(director => [director._id, director]));
+  
+      newDirectors.forEach((director:Director) => {
+        if (!directorMap.has(director._id)) {
+          directorMap.set(director._id, director);
+        }
+      });
+  
+      return Array.from(directorMap.values());
+    });
+  
+    const options = newDirectors.map((director: Director) => ({
       value: director._id,
       label: director.name,
     }));
@@ -113,28 +124,40 @@ export default function NewMovie(){
     }
 
 
-  async function searchActors(search: string) {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/actor/searchActor?search=${encodeURIComponent(search)}`,{
+    async function searchActors(search: string) {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/actor/searchActor?search=${encodeURIComponent(search)}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-
+    
       if (response.status === 400) { // Unauthorized
         Cookies.remove('token');
         router.push('/');
-        return;
+        return [];
       }
-
-      const actors = await response.json();
-      setActors(actors);
-  
-      const options = actors.map((actor: Actor) => ({
+    
+      const newActors = await response.json();
+      
+      setActors(prevActors => {
+        const actorMap = new Map(prevActors.map(actor => [actor._id, actor]));
+    
+        newActors.forEach((actor:Actor) => {
+          if (!actorMap.has(actor._id)) {
+            actorMap.set(actor._id, actor);
+          }
+        });
+    
+        return Array.from(actorMap.values());
+      });
+    
+      const options = newActors.map((actor:Actor) => ({
         value: actor._id,
         label: actor.name,
       }));
       return options;
     }
+    
 
     return (
         <div className="min-h-screen w-full lg:min-h-screen lg:h-auto bg-black">

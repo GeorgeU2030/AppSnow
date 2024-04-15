@@ -108,7 +108,7 @@ export default function NewActor(){
                 <AvatarImage src={field.value} alt="@shadcn"/>
                 <AvatarFallback>Dir</AvatarFallback>
                 </Avatar>
-                <Input placeholder="the image of the director" className="ml-2 text-end text-black" {...field} />
+                <Input placeholder="the image of the actor" className="ml-2 text-end text-black" {...field} />
               </div>
               </FormControl>
               <FormMessage className="text-white"/>
