@@ -28,7 +28,7 @@ import { LoaderCircle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserLoading, setUser } from "@/store/userSlice";
 import { RootState } from "@/store/store";
-import { Clapperboard, Film, LogOut, Star} from "lucide-react";
+import { Clapperboard, Film, LogOut, Star, Snowflake, BarChart3} from "lucide-react";
 import Cookies from "js-cookie";
 
 const desktopImageUrls = [
@@ -69,9 +69,21 @@ interface MyToken extends JwtPayload {
   role: string[];
 }
 
+interface Movie {
+  _id: string;
+  name: string;
+  cover: string;
+  points: number;
+  amount: number;
+  oscars: number;
+  year:number
+}
+
 export default function Home() {
 
     const [admin,setAdmin]= useState<boolean>(false);
+    const [movies, setMovies]=useState<Movie[]>([]);
+    const [thereUser, setThereUser]=useState<boolean>(false);
     const history = useRouter();
     const dispatch = useDispatch();
     const loadingUser = useSelector((state:RootState) => state.user.loading);
@@ -101,18 +113,49 @@ export default function Home() {
           })
           .then(data => {
             dispatch(setUser({name: data.name, email: data.email, imageProfile: data.imageProfile})); 
+            setThereUser(true);
           })
           .catch(error => console.error('Error:', error))
           .finally(() => dispatch(setUserLoading(false)));
+        
       }
       else {
         dispatch(setUserLoading(false));
+        dispatch(setUser(null));
         setAdmin(false)
       }
-    }, []);
+
+      if(!admin){
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/movie/getRandomMovies`)
+        .then(response => {
+          if (response.status === 400) { // Unauthorized
+            Cookies.remove('token');
+            window.location.reload();
+            return [];
+          }
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data:any) => {
+          setMovies(data);
+        })
+        .catch(error => console.error('Error:', error));
+
+      }else {
+        dispatch(setUserLoading(false));
+        dispatch(setUser(null));
+        setAdmin(false)
+      }
+    }, [admin,dispatch]);
 
     const signIn = () => {
       history.push('/signIn');
+    }
+
+    const signUp = () => {
+      history.push('/signUp');
     }
 
     const handleChange = (selectedValue:string) => {
@@ -129,13 +172,15 @@ export default function Home() {
 
     const handleLogout = () => {
       localStorage.removeItem('token');
+      Cookies.remove('token');
       setUser(null);
       setAdmin(false);
       history.push('/');
+      window.location.reload();
     }
 
   return (
-    <div className="w-screen h-screen bg-black">
+    <div className="w-screen min-h-screen bg-black">
       <nav className="px-4 py-4 flex justify-between items-center bg-[#2B388F]">
         <ul >
           <li className="flex items-center">
@@ -144,8 +189,9 @@ export default function Home() {
           </li>
         </ul>
         <ul className="flex ">
-          
-            {admin ? (
+
+          {thereUser ? (
+            admin ? (
               <Select onValueChange={handleChange}>
               <SelectTrigger className="w-[180px] mr-2 lg:mr-8 md:mr-8 bg-black text-white">
                 <SelectValue placeholder="Admin" />
@@ -174,14 +220,44 @@ export default function Home() {
                   <div className="flex items-center">
                     <LogOut/>
                     <span className="ml-2">Logout</span>
-                  </div>                   
+                  </div>
                   </SelectItem>
                 </SelectGroup>
                 </SelectContent>
               </Select>
-            ):(<>
-            </>)}
-          
+            ):(
+              <Select onValueChange={handleChange}>
+              <SelectTrigger className="w-[180px] mr-2 lg:mr-8 md:mr-8 bg-black text-white">
+                <SelectValue placeholder="User" />
+              </SelectTrigger>
+                <SelectContent className="w-[180px]">
+                <SelectGroup className="w-[180px]">
+                  <SelectItem value="createDirector" className="font-semibold">
+                  <div className="flex items-center">
+                    <BarChart3/>
+                    <span className="ml-2">Mis Ratings</span>
+                  </div>
+                  </SelectItem>
+                  <SelectItem value="createMovie" className="font-semibold">
+                  <div className="flex items-center">
+                    <Film/>
+                    <span className="ml-2">See Movies</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="logout" className="font-semibold bg-blue-600 text-white">
+                  <div className="flex items-center">
+                    <LogOut/>
+                    <span className="ml-2">Logout</span>
+                  </div>
+                  </SelectItem>
+                </SelectGroup>
+                </SelectContent>
+              </Select>
+            )
+          ) : (
+            null
+          )
+          }
           <li>
           {loadingUser ? (
           <LoaderCircle className="text-white" />
@@ -189,13 +265,13 @@ export default function Home() {
             <Avatar className="lg:block md:block" >
               <AvatarImage src={user.imageProfile} alt="@shadcn"/>
               <AvatarFallback></AvatarFallback>
-            </Avatar> 
+            </Avatar>
           ) : (
             <>
               <Button className="mr-4 hover:bg-[#2953A6] bg-[#1F82BF] px-5" onClick={signIn}>
                 Sign In
               </Button>
-              <Button className="mr-2 hover:bg-[#2953A6] bg-[#1F82BF]">
+              <Button className="mr-2 hover:bg-[#2953A6] bg-[#1F82BF]" onClick={signUp}>
                 Sign Up
               </Button>
             </>
@@ -219,26 +295,26 @@ export default function Home() {
           <div className="p-1">
             <Card className="h-[26rem] bg-[#1F82BF]">
               <CardContent className="flex flex-col aspect-square items-center w-full justify-center p-6 h-[26rem]">
-                <img 
-                  src={mobileImageUrls[index % mobileImageUrls.length]} 
-                  alt={`Mobile Image ${index + 1}`} 
-                  className="object-cover w-full h-full block lg:hidden md:hidden" 
+                <img
+                  src={mobileImageUrls[index % mobileImageUrls.length]}
+                  alt={`Mobile Image ${index + 1}`}
+                  className="object-cover w-full h-full block lg:hidden md:hidden"
                 />
-                <img 
-                  src={desktopImageUrls[index % desktopImageUrls.length]} 
-                  alt={`Desktop Image ${index + 1}`} 
-                  className="object-cover w-full h-full hidden lg:block md:block" 
+                <img
+                  src={desktopImageUrls[index % desktopImageUrls.length]}
+                  alt={`Desktop Image ${index + 1}`}
+                  className="object-cover w-full h-full hidden lg:block md:block"
                 />
-                
+
                 <span className="text-center py-3 text-white flex">{textMovies[index]}
                 <img
                   src='/oscar.png'
                   className="w-8 h-8 hidden lg:block md:block"
                 />
                 </span>
-                
+
                 </CardContent>
-              
+
             </Card>
           </div>
         </CarouselItem>
@@ -249,6 +325,37 @@ export default function Home() {
     </div>
     </div>
 
+    {!admin ? (
+    <div className="max-w-full flex justify-center mt-10 ">
+      <div className="w-3/4 grid lg:grid-cols-4 gap-4 md:grid-cols-3">
+      {movies.map(movie => (
+      <div key={movie._id} className="bg-[#2953a6] flex flex-col items-center rounded-lg">
+        <img src={movie.cover} className="h-48 w-36 mt-2" alt={movie.name} />
+        <h2 className="text-center mx-1 h-12 flex items-center justify-center text-white">{movie.name}</h2>
+        <div className="flex mt-2 items-center">
+          <Snowflake className="w-10 h-10 text-white"/>
+          {movie.amount === 0 ? (
+            <p className="text-white ml-2">---</p>
+          ):(
+            <p className="text-white">{movie.points}</p>
+          )}
+          {movie.oscars > 0 &&
+          <img src="/oscar.png" className="w-10 h-10 "/>
+          }
+        </div>
+        <p className="text-white mt-2 text-sm">{movie.amount} votes</p>
+      </div>
+    ))}
+    </div>
+    </div>
+    ):(
+      <div>
+        <h2 className="text-white">holaa</h2>
+      </div>
+    )
+    }
+
+    <footer className="mt-8 bg-black">Snow</footer>
     </div>
   );
 }
