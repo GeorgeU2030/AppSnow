@@ -96,8 +96,7 @@ export default function NewMovie(){
       }
     });
 
-
-    if (response.status === 400) { // Unauthorized
+    if (response.status === 400) {
       Cookies.remove('token');
       router.push('/');
       return;

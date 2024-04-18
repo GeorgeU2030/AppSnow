@@ -122,7 +122,7 @@ export default function Home() {
       else {
         dispatch(setUserLoading(false));
         dispatch(setUser(null));
-        setAdmin(false)
+
       }
 
       if(!admin){
@@ -146,9 +146,8 @@ export default function Home() {
       }else {
         dispatch(setUserLoading(false));
         dispatch(setUser(null));
-        setAdmin(false)
       }
-    }, [admin,dispatch]);
+    }, []);
 
     const signIn = () => {
       history.push('/signIn');
@@ -228,7 +227,7 @@ export default function Home() {
             ):(
               <Select onValueChange={handleChange}>
               <SelectTrigger className="w-[180px] mr-2 lg:mr-8 md:mr-8 bg-black text-white">
-                <SelectValue placeholder="User" />
+                <SelectValue placeholder={user?.name} />
               </SelectTrigger>
                 <SelectContent className="w-[180px]">
                 <SelectGroup className="w-[180px]">
