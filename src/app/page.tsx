@@ -169,6 +169,13 @@ export default function Home() {
       }
     }
 
+    const handleChangeUser = (selectedValue:string)=>{
+      if(selectedValue == 'myratings'){
+        history.push('/myratings');
+      }else if(selectedValue == 'seemovies') {
+        history.push('/movies');
+      }
+    }
     const handleLogout = () => {
       localStorage.removeItem('token');
       Cookies.remove('token');
@@ -225,19 +232,19 @@ export default function Home() {
                 </SelectContent>
               </Select>
             ):(
-              <Select onValueChange={handleChange}>
+              <Select onValueChange={handleChangeUser}>
               <SelectTrigger className="w-[180px] mr-2 lg:mr-8 md:mr-8 bg-black text-white">
                 <SelectValue placeholder={user?.name} />
               </SelectTrigger>
                 <SelectContent className="w-[180px]">
                 <SelectGroup className="w-[180px]">
-                  <SelectItem value="createDirector" className="font-semibold">
+                  <SelectItem value="myratings" className="font-semibold">
                   <div className="flex items-center">
                     <BarChart3/>
-                    <span className="ml-2">Mis Ratings</span>
+                    <span className="ml-2">My Ratings</span>
                   </div>
                   </SelectItem>
-                  <SelectItem value="createMovie" className="font-semibold">
+                  <SelectItem value="seemovies" className="font-semibold">
                   <div className="flex items-center">
                     <Film/>
                     <span className="ml-2">See Movies</span>

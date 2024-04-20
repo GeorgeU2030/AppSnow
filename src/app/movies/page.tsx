@@ -54,6 +54,9 @@ export default function Movies(){
     }
 }, [])
 
+    function gotoDetails(id:string){
+        router.push(`/movies/${id}`);
+    }
 
     async function getMovies(name:string) {
         const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/movie/getMovie?name=${encodeURIComponent(name)}`,{
@@ -110,7 +113,9 @@ export default function Movies(){
                 <div className="w-4/5 mb-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 gap-4 ">
                         {movies.map((movie) => (
-                            <div key={movie._id} className="flex bg-[#1F82BF] p-2 rounded-lg items-center">
+                            <div key={movie._id} className="flex bg-[#1F82BF] p-2 rounded-lg items-center"
+                            onClick={() => gotoDetails(movie._id)}
+                            >
                                 <img src={movie.cover} alt={movie.name} className="w-32 h-44"/>
                                 <div className="flex flex-col justify-center bg-slate-100 w-full rounded-r-lg">
                                     <h3 className="text-center font-semibold">{movie.name}</h3>
