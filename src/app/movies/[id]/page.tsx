@@ -50,13 +50,27 @@ export default function MovieId(){
                     <p className="mt-1">{movie?.year}</p>
                     <p>{movie?.duration} minutes</p>
                     <p>{movie?.points}</p>
-                    <p>{movie?.amount}</p>
-                    <p>{movie?.oscars}</p>
-
+                    <p className="text-sm">{movie?.amount} votes</p>
+                    {movie && <img
+                        src={
+                            movie.points < 30 ? "/snow30.png" :
+                                (movie.points >= 30 && movie.points < 50) ? "/snow50.png" :
+                                    (movie.points >= 50 && movie.points < 70) ? "/snow70.png" :
+                                        (movie.points >= 70 && movie.points < 90) ? "/snow90.png" :
+                                            (movie.points >= 90 && movie.points <= 100) ? "/snow100.png" :
+                                                "/default.png"
+                        }
+                        className="w-16 h-16"
+                        alt="image"
+                    />}
+                    {movie?.oscars === 1 &&
+                        <span className="text-center text-yellow-600 font-semibold"> {movie.oscars} Oscar Award </span>}
+                    {movie && movie?.oscars > 1 && <span
+                        className="text-center text-yellow-600 font-semibold">  {movie?.oscars} Oscar Awards </span>}
                 </section>
                 <section className="lg:w-1/2 md:w-1/2 w-full text-white flex flex-col">
 
-            </section>
+                </section>
             </div>
         </div>
     )
