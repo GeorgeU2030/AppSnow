@@ -3,8 +3,37 @@ import { useEffect,useState } from "react";
 import { useParams} from "next/navigation";
 import Cookies from "js-cookie";
 import {Button} from "@/components/ui/button";
+import { z } from "zod";
+import { zodResolver} from "@hookform/resolvers/zod";
+import { useForm} from "react-hook-form";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormMessage,
+} from "@/components/ui/form"
+import {Input} from "@/components/ui/input";
+import { jwtDecode, JwtPayload } from "jwt-decode";
+import { useRouter } from "next/navigation";
+
+const overallPointsSchema = z.object({
+    points: z.number().int().min(0).max(100),
+});
+
+interface MyToken extends JwtPayload {
+    _id: string;
+    role: string[];
+}
 
 export default function MovieId(){
+
+    const form = useForm<z.infer<typeof overallPointsSchema>>({
+        resolver: zodResolver(overallPointsSchema),
+        defaultValues: {
+            points: 0
+        },
+    })
 
     interface Movie {
         _id:string,
@@ -18,28 +47,32 @@ export default function MovieId(){
         duration:number
     }
 
+    const router = useRouter()
     const token = Cookies.get('token');
     const {id} = useParams()
     const [votation, setVotation] = useState<string>('')
     const [movie, setMovie] = useState<Movie | null>(null)
 
     useEffect (() => {
-        const fetchMovie = async () => {
-            if (id) {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/movie/getAMovie/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
+        if(token) {
+            const fetchMovie = async () => {
+                if (id) {
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/movie/getAMovie/${id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (response.ok) {
+                        const movieData = await response.json();
+                        setMovie(movieData);
                     }
-                });
-                if (response.ok) {
-                    const movieData = await response.json();
-                    setMovie(movieData);
                 }
-            }
-        };
-        fetchMovie();
+            };
+            fetchMovie();
+        }else{
+            router.push('/')
+        }
     },[])
-
 
     function votationCritic (){
         setVotation('critic')
@@ -47,6 +80,35 @@ export default function MovieId(){
 
     function votationOverall (){
         setVotation('overall')
+    }
+
+    async function onSubmit(values: z.infer<typeof overallPointsSchema>) {
+
+        if(!token){
+                return;
+        }
+        const decoded = jwtDecode<MyToken>(token);
+        const userID = decoded._id;
+
+        const dataToSed = {
+            userId: userID,
+            movieId: id,
+            points: values.points
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/movie/vote/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(dataToSed)
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setMovie(data);
     }
 
     return (
@@ -122,7 +184,42 @@ export default function MovieId(){
                                 >Critic Vote</Button>
                             </div>
 
+                            {votation === 'overall' &&
+                                <div className={'mt-6 flex flex-col justify-center items-center'}>
+                                    <p className={'text-sm'}>   Vote the movie from 0 to 100 </p>
+                                    <Form {...form}>
+                                        <form className={'mt-4 flex flex-col justify-center items-center'} onSubmit={form.handleSubmit(onSubmit)}>
+                                            <FormField
+                                                control={form.control}
+                                                name="points"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Input className="text-center text-blue-800 font-bold text-2xl px-1" type={'number'} min={'0'} max={'100'}
+                                                                   value={field.value === 0 ? '' : field.value}
+                                                                   onChange={(e) => {
+                                                                let value = parseInt(e.target.value)
+                                                                if (isNaN(value)) {
+                                                                    value = 0;
+                                                                } else if (value < 0) {
+                                                                    value = 0;
+                                                                } else if (value > 100) {
+                                                                    value = 100;
+                                                                }
+                                                                field.onChange(value);
+                                                            }}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage className="text-white" />
+                                                    </FormItem>
 
+                                                )}
+                                            />
+                                            <Button type="submit" className="bg-[#1F82BF] px-6 mt-5 hover:bg-[#2953A6] font-semibold">VOTE</Button>
+                                        </form>
+                                    </Form>
+                                </div>
+                            }
 
                         </div>
                 </section>
