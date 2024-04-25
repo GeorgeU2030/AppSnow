@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 import {Button} from "@/components/ui/button";
 import { z } from "zod";
 import { zodResolver} from "@hookform/resolvers/zod";
-import { useForm} from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
     Form,
     FormControl,
@@ -21,6 +21,11 @@ const overallPointsSchema = z.object({
     points: z.number().int().min(0).max(100),
 });
 
+interface Worker {
+    name: string;
+    picture:string;
+}
+
 interface MyToken extends JwtPayload {
     _id: string;
     role: string[];
@@ -31,7 +36,7 @@ export default function MovieId(){
     const form = useForm<z.infer<typeof overallPointsSchema>>({
         resolver: zodResolver(overallPointsSchema),
         defaultValues: {
-            points: 0
+            points: 100
         },
     })
 
@@ -44,7 +49,9 @@ export default function MovieId(){
         amount:number,
         genre:string,
         oscars:number,
-        duration:number
+        duration:number,
+        directors:Worker[],
+        actors:Worker[],
     }
 
     const router = useRouter()
@@ -75,7 +82,7 @@ export default function MovieId(){
     },[])
 
     function votationCritic (){
-        setVotation('critic')
+        router.push(`/movies/${id}/critic`)
     }
 
     function votationOverall (){
@@ -114,7 +121,7 @@ export default function MovieId(){
     return (
         <div className="min-h-screen w-screen bg-black">
             <div className="md:flex md:w-full md:items-center md:justify-center min-h-screen ">
-                <section className="lg:w-1/2 md:w-1/2 w-full text-white flex flex-col justify-center items-center">
+                <section className="lg:w-1/2 md:w-1/2 w-full text-white flex flex-col justify-center items-center mx-2">
                     <img src={movie?.cover} alt={movie?.name} className="w-1/3 h-1/2 mt-8 md:mt-1"/>
                     <h1 className="text-3xl mt-4">{movie?.name}</h1>
                     <div className={'flex items-center justify-center mt-2'}>
@@ -165,18 +172,39 @@ export default function MovieId(){
                         </div>
                         }
                 </section>
-                <section className="lg:w-1/2 md:w-1/2 w-full text-white flex flex-col items-center">
-                        <div className={'flex flex-col justify-center items-center w-full mb-6'}>
-                            <img src={'/snowlogo.png'} className={'w-12 h-12'}/>
-                            <h1 className={'ml-2 text-xl font-semibold'}>Snow</h1>
-                            <h2 className={'mt-2'}>Vote the Movie </h2>
+                <section className="lg:w-1/2 md:w-1/2 w-full text-white flex flex-col items-center px-2">
 
-                            <p className={'w-1/2 text-sm mt-1'}>
-                                In Snow, dive into the world of cinema and have your say in shaping its destiny. Whether you are casting your overall vote or critic vote. Join us and let your cinematic passion guide the way!
-                            </p>
+                    <div className={'w-full mb-2 mt-8 md:mt-0'}>
+                        <h1 className={'text-sm text-center'}>Directors</h1>
+                        <div className={'flex justify-center items-center'}>
+                            {movie && movie.directors.map((director) => (
+                                <div key={director.name} className={'flex flex-col items-center'}>
+                                    <img src={director.picture} className={'w-12 h-12 rounded-full'}/>
+                                    <p className={'text-sm'}>{director.name}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <h1 className={'text-sm text-center mt-3'}>Actors</h1>
+                        <div className={'flex justify-center items-center mt-1'}>
+                            {movie && movie.actors.map((actor) => (
+                                <div key={actor.name} className={'flex flex-col items-center'}>
+                                    <img src={actor.picture} className={'w-12 h-12 rounded-full mr-1'}/>
+                                </div>
+                            ))}
+                        </div>
+                        <div className={'text-center text-sm'}>
+                            {movie &&
+                                <p>{movie.actors.map(actor => actor.name).join(', ')}</p>
+                            }
+                        </div>
+                    </div>
+                    <div className={'flex flex-col justify-center items-center w-full mb-6'}>
 
-                            <div className={'mt-3'}>
-                                <Button className={'mr-2 bg-[#2953A6] hover:bg-slate-100 hover:text-[#2953a6] font-semibold'}
+                        <h2 className={'mt-2'}>Vote the Movie </h2>
+
+                        <div className={'mt-3'}>
+                            <Button
+                                className={'mr-2 bg-[#2953A6] hover:bg-slate-100 hover:text-[#2953a6] font-semibold'}
                                 onClick={votationOverall}
                                 >Overall Vote</Button>
                                 <Button className={'ml-2 px-6 bg-[#2953A6] hover:bg-slate-100 hover:text-[#2953a6] font-semibold'}
@@ -196,18 +224,18 @@ export default function MovieId(){
                                                     <FormItem>
                                                         <FormControl>
                                                             <Input className="text-center text-blue-800 font-bold text-2xl px-1" type={'number'} min={'0'} max={'100'}
-                                                                   value={field.value === 0 ? '' : field.value}
+                                                                   value={field.value === 0 || field.value ? field.value : ''}
                                                                    onChange={(e) => {
-                                                                let value = parseInt(e.target.value)
-                                                                if (isNaN(value)) {
-                                                                    value = 0;
-                                                                } else if (value < 0) {
-                                                                    value = 0;
-                                                                } else if (value > 100) {
-                                                                    value = 100;
-                                                                }
-                                                                field.onChange(value);
-                                                            }}
+                                                                       let value = parseInt(e.target.value);
+                                                                       if (isNaN(value)) {
+                                                                           value = NaN;
+                                                                       } else if (value < 0) {
+                                                                           value = 0;
+                                                                       } else if (value > 100) {
+                                                                           value = 100;
+                                                                       }
+                                                                       field.onChange(value);
+                                                                   }}
                                                             />
                                                         </FormControl>
                                                         <FormMessage className="text-white" />
@@ -221,7 +249,7 @@ export default function MovieId(){
                                 </div>
                             }
 
-                        </div>
+                    </div>
                 </section>
             </div>
         </div>
