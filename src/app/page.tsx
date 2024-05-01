@@ -34,7 +34,7 @@ import Cookies from "js-cookie";
 const desktopImageUrls = [
   'https://peachz.ca/wp-content/uploads/2023/06/R.jpeg',
   'https://image.tmdb.org/t/p/w1280/lbp1BmJNz979SbwqEZDgHYUeVg7.jpg',
-  'https://assets.mubicdn.net/images/artworks/668724/images-original.png?1708612772',
+  'https://ds.static.rtbf.be/article/image/1920x1080/1/5/9/94aa9a606ac6a95805134515b103bdd3.jpg',
   'https://chscommunicator.com/wp-content/uploads/2024/03/Screenshot-2024-03-04-at-9.17.21%E2%80%AFAM-1200x693.png',
   'https://themiamihurricane.com/wp-content/uploads/2024/01/boyandtheheron.png',
   'https://static1.colliderimages.com/wordpress/wp-content/uploads/2023/09/godzilla-minus-one-banner.jpg',
@@ -170,10 +170,13 @@ export default function Home() {
     }
 
     const handleChangeUser = (selectedValue:string)=>{
+
       if(selectedValue == 'myratings'){
         history.push('/myratings');
       }else if(selectedValue == 'seemovies') {
         history.push('/movies');
+      }else if(selectedValue == 'logout'){
+        handleLogout();
       }
     }
     const handleLogout = () => {
@@ -181,8 +184,8 @@ export default function Home() {
       Cookies.remove('token');
       setUser(null);
       setAdmin(false);
-      history.push('/');
-      window.location.reload();
+      history.refresh()
+      window.location.reload()
     }
 
   return (

@@ -98,7 +98,7 @@ export default function Movies(){
 
             <div>
                 <div className="flex justify-end mt-4">
-                    <Input placeholder="Search Movies" className="w-1/5 mr-1 font-semibold"
+                    <Input placeholder="Search Movies" className="w-3/5 md:w-1/5 mr-1 font-semibold"
                     value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <Button className="mr-3 bg-[#1F82BF] hover:bg-blue-600 px-2"
