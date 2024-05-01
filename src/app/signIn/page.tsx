@@ -13,7 +13,10 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import Cookies from 'js-cookie'
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
+import {Ban} from "lucide-react";
 
 const SignInSchema = z.object({
     email: z.string().email(
@@ -28,6 +31,8 @@ const SignInSchema = z.object({
 
 export default function SignIn(){
 
+    const [thereUser, setThereUser] = useState(false)
+    const [showAlert, setShowAlert] = useState(false)
     const router = useRouter()
 
     const form = useForm<z.infer<typeof SignInSchema>>({
@@ -48,7 +53,14 @@ export default function SignIn(){
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+          if(response.status === 404){
+                setShowAlert(true)
+          }
+          if(response.status === 400){
+                setThereUser(true)
+                setShowAlert(true)
+          }
+          return;
       }
       const data = await response.json();
       Cookies.set('token', data.message);
@@ -56,9 +68,22 @@ export default function SignIn(){
     }
 
     return (
-        <div className="h-screen w-screen bg-black">
+        <div className="min-h-screen w-screen bg-black lg:h-auto">
+            {showAlert && (
+                <div className="flex justify-center">
+                    <Alert className="w-2/3 mt-2">
+                        <Ban className="h-4 w-4" />
+                        {thereUser ? (
+                        <AlertTitle>The user or password are incorrect! try again</AlertTitle>
+                            ) : (
+                        <AlertTitle>The user does not exist</AlertTitle>
+                        )
+                        }
+                    </Alert>
+                </div>
+            )}
         <div className="flex flex-col h-full w-full justify-center text-white items-center">
-        <div className=" mb-12 flex items-center">
+        <div className=" mb-12 flex items-center mt-6">
             <img
             src='/snowlogo.png'
             className="w-16 h-16"

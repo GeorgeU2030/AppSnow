@@ -113,7 +113,7 @@ export default function Movies(){
                 <div className="w-4/5 mb-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 gap-4 ">
                         {movies.map((movie) => (
-                            <div key={movie._id} className="flex bg-[#1F82BF] p-2 rounded-lg items-center"
+                            <div key={movie._id} className="flex bg-[#1F82BF] p-2 rounded-lg items-center cursor-pointer"
                             onClick={() => gotoDetails(movie._id)}
                             >
                                 <img src={movie.cover} alt={movie.name} className="w-32 h-44"/>

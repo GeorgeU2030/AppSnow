@@ -155,20 +155,22 @@ export default function MyRatings(){
                                             />
                                         )}
 
+                                    </div>
+
+                                    <div className={'flex justify-center items-center mb-2 mt-1'}>
+                                    <Button className={'px-2 ml-4 bg-sky-600 hover:bg-sky-950'}
+                                            onClick={()=>handleButtonClick(rating._id, rating.points)}
+                                    >
+                                        {!isEditing ? <Pencil/> : <Upload/>}
+                                    </Button>
+                                    {isEditing &&
                                         <Button className={'px-2 ml-4 bg-sky-600 hover:bg-sky-950'}
-                                        onClick={()=>handleButtonClick(rating._id, rating.points)}
-                                        >
-                                            {!isEditing ? <Pencil/> : <Upload/>}
-                                        </Button>
-                                        {isEditing &&
-                                        <Button className={'px-2 ml-4 bg-sky-600 hover:bg-sky-950'}
-                                        onClick={backstate}
+                                                onClick={backstate}
                                         >
                                             <RotateCcw/>
                                         </Button>
-                                        }
+                                    }
                                     </div>
-
                                 </div>
                             </div>
                         ))}

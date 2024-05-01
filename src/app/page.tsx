@@ -346,7 +346,7 @@ export default function Home() {
           {movie.amount === 0 ? (
             <p className="text-white ml-2">---</p>
           ):(
-            <p className="text-white">{movie.points}</p>
+            <p className="text-white ml-2">{movie.points}</p>
           )}
           {movie.oscars > 0 &&
           <img src="/oscar.png" className="w-10 h-10 "/>
