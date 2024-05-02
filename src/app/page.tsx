@@ -340,7 +340,7 @@ export default function Home() {
       {movies.map(movie => (
       <div key={movie._id} className="bg-[#2953a6] flex flex-col items-center rounded-lg">
         <img src={movie.cover} className="h-48 w-36 mt-2" alt={movie.name} />
-        <h2 className="text-center mx-1 h-12 flex items-center justify-center text-white">{movie.name}</h2>
+       <h2 className="text-center mx-1 h-16 flex items-center justify-center text-white overflow-hidden text-overflow-ellipsis whitespace-wrap">{movie.name}</h2>
         <div className="flex mt-2 items-center">
           <Snowflake className="w-10 h-10 text-white"/>
           {movie.amount === 0 ? (
