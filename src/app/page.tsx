@@ -359,7 +359,7 @@ export default function Home() {
     </div>
     ):(
       <div>
-        <h2 className="text-white">holaa</h2>
+        <h2 className="text-white"></h2>
       </div>
     )
     }

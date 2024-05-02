@@ -123,7 +123,7 @@ export default function MovieId(){
             <div className="md:flex md:w-full md:items-center md:justify-center min-h-screen ">
                 <section className="lg:w-1/2 md:w-1/2 w-full text-white flex flex-col justify-center items-center mx-2">
                     <img src={movie?.cover} alt={movie?.name} className="w-1/3 h-1/2 mt-8 md:mt-1"/>
-                    <h1 className="text-3xl mt-4">{movie?.name}</h1>
+                    <h1 className="text-3xl mt-4 text-center">{movie?.name}</h1>
                     <div className={'flex items-center justify-center mt-2'}>
                     <p>{movie?.genre}</p>
                     <p className={'ml-1'}> - {movie?.year}</p>
@@ -179,10 +179,14 @@ export default function MovieId(){
                         <div className={'flex justify-center items-center'}>
                             {movie && movie.directors.map((director) => (
                                 <div key={director.name} className={'flex flex-col items-center'}>
-                                    <img src={director.picture} className={'w-12 h-12 rounded-full'}/>
-                                    <p className={'text-sm'}>{director.name}</p>
+                                    <img src={director.picture} className={'w-12 h-12 rounded-full mr-1'}/>
                                 </div>
                             ))}
+                        </div>
+                        <div className={'text-center text-sm'}>
+                            {movie &&
+                                <p>{movie.directors.map(director => director.name).join(', ')}</p>
+                            }
                         </div>
                         <h1 className={'text-sm text-center mt-3'}>Actors</h1>
                         <div className={'flex justify-center items-center mt-1'}>
@@ -203,7 +207,7 @@ export default function MovieId(){
                         <h2 className={'mt-2'}>Vote the Movie </h2>
 
                         <div className={'mt-3'}>
-                            <Button
+                        <Button
                                 className={'mr-2 bg-[#2953A6] hover:bg-slate-100 hover:text-[#2953a6] font-semibold'}
                                 onClick={votationOverall}
                                 >Overall Vote</Button>
