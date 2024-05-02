@@ -1,6 +1,6 @@
 "use client"
 
-import {Home, Pencil, Upload, RotateCcw} from "lucide-react";
+import {Home, Pencil, Upload, RotateCcw, Search, SquareArrowDown, SquareArrowUp} from "lucide-react";
 import {useRouter} from "next/navigation";
 import {useState, useEffect} from "react";
 import Cookies from "js-cookie";
@@ -30,6 +30,7 @@ interface Rating {
 
 export default function MyRatings(){
 
+    const [searchTerm, setSearchTerm] = useState<string>("");
     const [inputValue, setInputValue] = useState<number>(0);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const router = useRouter();
@@ -61,7 +62,7 @@ export default function MyRatings(){
             router.push('/');
         }
 
-    })
+    },[])
 
     const handleButtonClick = (ratingid:string, points:number) => {
         if(isEditing){
@@ -96,6 +97,45 @@ export default function MyRatings(){
         }
     }
 
+    async function getSearch(name:string){
+        const token = Cookies.get('token');
+        if (!token) {
+            router.push('/');
+            return;
+        }
+        const decoded = jwtDecode<MyToken>(token);
+        const userId = decoded._id;
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/rating/getMovieInRatings/${userId}?name=${encodeURIComponent(name)}`,{
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        if (response.status === 400) { // Unauthorized
+            Cookies.remove('token');
+            router.push('/');
+            return;
+        }
+        if(response.ok) {
+            const data = await response.json();
+            console.log(data)
+            setRatings(data);
+        }
+    }
+
+    const orderup = () => {
+        const ordered = [...ratings].sort((a, b) => a.points - b.points);
+        setRatings(ordered);
+    }
+
+    const orderdown = () => {
+        const ordered = [...ratings].sort((a, b) => b.points - a.points);
+        setRatings(ordered);
+    }
+
+    const handleSearchClick = () => {
+        getSearch(searchTerm);
+    }
+
     const backstate = () => {
         setIsEditing(false);
     }
@@ -117,67 +157,91 @@ export default function MyRatings(){
                 </ul>
             </nav>
 
-            {ratings.length > 0 ? (
-            <div className="flex justify-center mt-5 ">
-                <div className="w-4/5 mb-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 gap-4 ">
-                        {ratings && ratings.map((rating) => (
-                            <div key={rating._id} className="flex bg-[#1F82BF] p-2 rounded-lg items-center"
 
-                            >
-                                <img src={rating.movie.cover} alt={rating.movie.name} className="w-32 h-44"/>
-                                <div className="flex flex-col justify-center bg-slate-100 w-full rounded-r-lg">
-                                    <h3 className="text-center font-semibold">{rating.movie.name}</h3>
-                                    <p className="text-center text-blue-900 font-semibold">{rating.movie.year}
-                                    </p>
-
-                                    <div className="flex justify-center items-center mt-2">
-                                        <img
-                                            src={
-                                            rating.points < 30 ? "/snow30.png" :
-                                                (rating.points >= 30 && rating.points < 50) ? "/snow50.png" :
-                                                    (rating.points >= 50 && rating.points < 70) ? "/snow70.png" :
-                                                        (rating.points >= 70 && rating.points < 90) ? "/snow90.png" :
-                                                            (rating.points >= 90 && rating.points <= 100) ? "/snow100.png" :
-                                                                            "/default.png"
-                                                    }
-                                                    className="w-16 h-16"
-                                                    alt="image"
-                                                />
-                                        {!isEditing ? (
-                                            <h3 className="text-center text-blue-900 font-bold text-3xl ml-2">{rating.points}</h3>
-                                        ) : (
-                                            <Input
-                                                value={inputValue}
-                                                type={'number'}
-                                                onChange={(e) => setInputValue(parseInt(e.target.value))}
-                                                className="w-20 h-12 text-center text-blue-900 font-bold text-3xl ml-2"
-                                            />
-                                        )}
-
-                                    </div>
-
-                                    <div className={'flex justify-center items-center mb-2 mt-1'}>
-                                    <Button className={'px-2 ml-4 bg-sky-600 hover:bg-sky-950'}
-                                            onClick={()=>handleButtonClick(rating._id, rating.points)}
-                                    >
-                                        {!isEditing ? <Pencil/> : <Upload/>}
-                                    </Button>
-                                    {isEditing &&
-                                        <Button className={'px-2 ml-4 bg-sky-600 hover:bg-sky-950'}
-                                                onClick={backstate}
-                                        >
-                                            <RotateCcw/>
-                                        </Button>
-                                    }
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+            <div>
+                <div className="flex justify-end mt-4">
+                    <Button className={'px-2 bg-sky-600 hover:bg-sky-950 mr-2'}
+                    onClick={()=> orderup()}
+                    >
+                        <SquareArrowUp/>
+                    </Button>
+                    <Button className={'px-2 bg-sky-600 hover:bg-sky-950 mr-2'}
+                    onClick={()=> orderdown()}
+                    >
+                        <SquareArrowDown/>
+                    </Button>
+                    <Input placeholder="Search Movies" className="w-3/5 md:w-1/5 mr-1 font-semibold"
+                           value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <Button className="mr-3 bg-[#1F82BF] hover:bg-blue-600 px-2"
+                            onClick={handleSearchClick}
+                    >
+                        <Search/>
+                    </Button>
                 </div>
             </div>
-                ) : (
+
+            {ratings.length > 0 ? (
+                <div className="flex justify-center mt-5 ">
+                    <div className="w-4/5 mb-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 gap-4 ">
+                            {ratings && ratings.map((rating) => (
+                                <div key={rating._id} className="flex bg-[#1F82BF] p-2 rounded-lg items-center"
+
+                                >
+                                    <img src={rating.movie.cover} alt={rating.movie.name} className="w-32 h-44"/>
+                                    <div className="flex flex-col justify-center bg-slate-100 w-full rounded-r-lg">
+                                        <h3 className="text-center font-semibold">{rating.movie.name}</h3>
+                                        <p className="text-center text-blue-900 font-semibold">{rating.movie.year}
+                                        </p>
+
+                                        <div className="flex justify-center items-center mt-2">
+                                            <img
+                                                src={
+                                                    rating.points < 30 ? "/snow30.png" :
+                                                        (rating.points >= 30 && rating.points < 50) ? "/snow50.png" :
+                                                            (rating.points >= 50 && rating.points < 70) ? "/snow70.png" :
+                                                                (rating.points >= 70 && rating.points < 90) ? "/snow90.png" :
+                                                                    (rating.points >= 90 && rating.points <= 100) ? "/snow100.png" :
+                                                                        "/default.png"
+                                                }
+                                                className="w-16 h-16"
+                                                alt="image"
+                                            />
+                                            {!isEditing ? (
+                                                <h3 className="text-center text-blue-900 font-bold text-3xl ml-2">{rating.points}</h3>
+                                            ) : (
+                                                <Input
+                                                    value={inputValue}
+                                                    type={'number'}
+                                                    onChange={(e) => setInputValue(parseInt(e.target.value))}
+                                                    className="w-20 h-12 text-center text-blue-900 font-bold text-3xl ml-2"
+                                                />
+                                            )}
+
+                                        </div>
+
+                                        <div className={'flex justify-center items-center mb-2 mt-1'}>
+                                            <Button className={'px-2 ml-4 bg-sky-600 hover:bg-sky-950'}
+                                                    onClick={() => handleButtonClick(rating._id, rating.points)}
+                                            >
+                                                {!isEditing ? <Pencil/> : <Upload/>}
+                                            </Button>
+                                            {isEditing &&
+                                                <Button className={'px-2 ml-4 bg-sky-600 hover:bg-sky-950'}
+                                                        onClick={backstate}
+                                                >
+                                                    <RotateCcw/>
+                                                </Button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            ) : (
 
                 <div className={'flex h-[26rem] justify-center items-center'}>
                     <h1 className={'text-white'}> You do not have ratings yet</h1>
